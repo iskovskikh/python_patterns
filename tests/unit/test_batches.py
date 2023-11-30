@@ -1,6 +1,6 @@
 from datetime import date
 
-from models import OrderLine, Batch
+from allocation.models import OrderLine, Batch
 
 
 def make_batch_and_line(sku, batch_qty, line_qty):
@@ -11,7 +11,7 @@ def make_batch_and_line(sku, batch_qty, line_qty):
         eta=date.today()
     )
     order_line = OrderLine(
-        orderId='order-001',
+        orderid='order-001',
         sku=sku,
         quantity=line_qty
     )
@@ -47,7 +47,7 @@ def test_can_allocate_if_sku_does_not_match():
         eta=date.today()
     )
     order_line = OrderLine(
-        orderId='order-001',
+        orderid='order-001',
         sku='sku-002',
         quantity=2
     )

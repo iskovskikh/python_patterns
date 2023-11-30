@@ -1,1 +1,7 @@
+django
+fastapi
+flask
 pytest
+sqlalchemy
+tenacity
+uvicorn

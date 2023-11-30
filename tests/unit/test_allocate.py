@@ -2,7 +2,7 @@ from datetime import date, timedelta
 
 import pytest
 
-from models import Batch, OrderLine, OutOfStock, allocate
+from allocation.models import Batch, OrderLine, OutOfStock, allocate
 
 
 def test_prefer_current_stock_batches():
@@ -20,7 +20,7 @@ def test_prefer_current_stock_batches():
     )
 
     order_line = OrderLine(
-        orderId='order-001',
+        orderid='order-001',
         sku='Table',
         quantity=2
     )
@@ -52,7 +52,7 @@ def test_prefer_earlier_batches():
     )
 
     order_line = OrderLine(
-        orderId='order-001',
+        orderid='order-001',
         sku='Table',
         quantity=2
     )
@@ -79,7 +79,7 @@ def test_return_allocated_batch_ref():
     )
 
     order_line = OrderLine(
-        orderId='order-001',
+        orderid='order-001',
         sku='Table',
         quantity=2
     )
@@ -97,13 +97,13 @@ def test_raise_out_of_stock_exception_if_cannot_allocate():
         eta=None
     )
     order_1 = OrderLine(
-        orderId='order-001',
+        orderid='order-001',
         sku='Table',
         quantity=10
     )
     allocate(order_1, [in_stock_batch, ])
     order_2 = OrderLine(
-        orderId='order-002',
+        orderid='order-002',
         sku='Table',
         quantity=10
     )
