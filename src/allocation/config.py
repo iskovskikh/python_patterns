@@ -10,4 +10,10 @@ def get_postgres_uri():
 
 
 def get_sqlite_uri():
-    return 'sqlite://'
+    return 'sqlite:///allocation.db'
+
+
+def get_api_url():
+    host = os.environ.get("API_HOST", "localhost")
+    port = 8000 if host == "localhost" else 80
+    return f"http://{host}:{port}"

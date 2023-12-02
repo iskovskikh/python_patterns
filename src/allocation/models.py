@@ -3,7 +3,7 @@ from datetime import date
 from typing import Optional, Set
 
 
-class OutOfStock(Exception):
+class OutOfStockException(Exception):
     pass
 
 
@@ -33,6 +33,12 @@ class Batch:
         self.eta = eta
         self._purchased_quantity: int = quantity
         self._allocations: Set[OrderLine] = set()
+
+    def __repr__(self):
+        return f"<Batch {self.reference}>"
+
+    def __hash__(self):
+        return hash(self.reference)
 
     def __gt__(self, other):
         if self.eta is None:
@@ -72,6 +78,6 @@ def allocate(line: OrderLine, batches: list[Batch]) -> str:
             b for b in sorted(batches) if b.can_allocate(line)
         )
     except StopIteration:
-        raise OutOfStock(f'Артикула {line.sku} нет в наличии')
+        raise OutOfStockException(f'Артикула {line.sku} нет в наличии')
     batch.allocate(line)
     return batch.reference

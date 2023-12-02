@@ -2,6 +2,7 @@ django
 fastapi
 flask
 pytest
+requests
 sqlalchemy
 tenacity
 uvicorn

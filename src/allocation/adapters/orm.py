@@ -43,32 +43,24 @@ allocations = Table(
 )
 
 
+# def start_mappers():
+#     lines_mapper = mapper_registry.map_imperatively(OrderLine, order_lines)
+#     mapper_registry.map_imperatively(Batch, batches, properties={
+#         '_allocations': relationship(
+#             lines_mapper,
+#             secondary=allocations,
+#             collection_class=set,
+#         )
+#     })
+
 def start_mappers():
-    # lines_mapper = mapper(OrderLine, order_lines)
-    # batches_mapper = mapper(Batch, batches, properties={
-    #     '_allocations': relationship(
-    #         lines_mapper,
-    #         secondary=allocations,
-    #         collection_class=set,
-    #     )
-    # })
-    # mapper(Product, products, properties={
-    #     'batches': relationship(batches_mapper)
-    # })
-
     lines_mapper = mapper_registry.map_imperatively(OrderLine, order_lines)
-    batches_mapper = mapper_registry.map_imperatively(Batch, batches, properties={
-        '_allocations': relationship(
-            lines_mapper,
-            secondary=allocations,
-            collection_class=set,
-        )
-    })
-    # mapper_registry.map_imperatively(Product, products, properties={
-    #     'batches': relationship(batches_mapper)
-    # })
-
-
-@event.listens_for(Product, 'load')
-def receive_load(product, _):
-    product.events = []
+    mapper_registry.map_imperatively(
+        Batch,
+        batches,
+        properties={
+            "_allocations": relationship(
+                lines_mapper, secondary=allocations, collection_class=set,
+            )
+        },
+    )

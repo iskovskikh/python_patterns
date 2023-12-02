@@ -2,7 +2,7 @@ from datetime import date, timedelta
 
 import pytest
 
-from allocation.models import Batch, OrderLine, OutOfStock, allocate
+from allocation.models import Batch, OrderLine, OutOfStockException, allocate
 
 
 def test_prefer_current_stock_batches():
@@ -107,5 +107,5 @@ def test_raise_out_of_stock_exception_if_cannot_allocate():
         sku='Table',
         quantity=10
     )
-    with pytest.raises(OutOfStock, match='Table'):
+    with pytest.raises(OutOfStockException, match='Table'):
         allocate(order_2, [in_stock_batch, ])
