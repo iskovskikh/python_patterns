@@ -34,7 +34,7 @@ def insert_order_line(session) -> str:
     return order_line_id
 
 
-def insert_batch(session, batch_id):
+def insert_batch(session, batch_id, ):
     session.execute(
         text('INSERT INTO batches (reference, sku, _purchased_quantity, eta) VALUES (:batch_id, "Table", 10, null)'),
         dict(batch_id=batch_id)

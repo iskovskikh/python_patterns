@@ -14,10 +14,6 @@ from allocation.services import InvalidSkuException
 app = FastAPI()
 
 
-# def get_session():
-#     pass
-
-
 class LineInput(BaseModel):
     orderid: str
     sku: str
