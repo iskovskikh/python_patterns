@@ -5,8 +5,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from allocation import config, services
-from allocation.adapters.orm import start_mappers, metadata
-from allocation.models import OrderLine, OutOfStockException
+from allocation.adapters.orm import start_mappers
+from allocation.models import OutOfStockException
 from allocation.repository import SqlAlchemyBatchRepository
 from allocation.services import InvalidSkuException
 
