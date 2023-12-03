@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from datetime import date
-from typing import Optional, Set
+from typing import Optional, Set, List
 
 
 class OutOfStockException(Exception):
@@ -72,12 +72,10 @@ class Batch:
         return self.sku == line.sku and self.available_quantity >= line.quantity
 
 
-def allocate(line: OrderLine, batches: list[Batch]) -> str:
+def allocate(line: OrderLine, batches: List[Batch]) -> str:
     try:
-        batch = next(
-            b for b in sorted(batches) if b.can_allocate(line)
-        )
+        batch = next(b for b in sorted(batches) if b.can_allocate(line))
+        batch.allocate(line)
+        return batch.reference
     except StopIteration:
         raise OutOfStockException(f'Артикула {line.sku} нет в наличии')
-    batch.allocate(line)
-    return batch.reference
