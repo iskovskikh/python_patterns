@@ -4,6 +4,7 @@ from typing import Optional
 from allocation import models
 from allocation.models import Batch, OrderLine
 from allocation.repository import AbstractBatchRepository
+from allocation.service_layer.unit_of_work import AbstractBatchUnitOfWork
 
 
 class InvalidSkuException(Exception):
@@ -18,19 +19,19 @@ def allocate(
         orderid: str,
         sku: str,
         quantity: int,
-        repo: AbstractBatchRepository,
-        session
+        uow:AbstractBatchUnitOfWork
 ) -> str:
     line = OrderLine(
         orderid=orderid,
         sku=sku,
         quantity=quantity
     )
-    batches = repo.list()
-    if not is_valid_sku(line.sku, batches):
-        raise InvalidSkuException(f'Недопустимый артикул {sku}')
-    batch_ref = models.allocate(line, batches)
-    session.commit()
+    with uow:
+        batches = uow.batches.list()
+        if not is_valid_sku(line.sku, batches):
+            raise InvalidSkuException(f'Недопустимый артикул {sku}')
+        batch_ref = models.allocate(line, batches)
+        uow.commit()
     return batch_ref
 
 
@@ -39,8 +40,8 @@ def add_batch(
         sku: str,
         quantity: int,
         eta: Optional[date],
-        repo: AbstractBatchRepository,
-        session
+        uow: AbstractBatchUnitOfWork
 ):
-    repo.add(Batch(reference=reference, sku=sku, quantity=quantity, eta=eta))
-    session.commit()
+    with uow:
+        uow.batches.add(Batch(reference=reference, sku=sku, quantity=quantity, eta=eta))
+        uow.commit()

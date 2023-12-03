@@ -9,6 +9,7 @@ from allocation import services
 from allocation.api.flask.flask_app import get_session
 from allocation.models import OrderLine, OutOfStockException
 from allocation.repository import SqlAlchemyBatchRepository
+from allocation.service_layer.unit_of_work import SqlAlchemyBatchUnitOfWork
 from allocation.services import InvalidSkuException
 
 app = FastAPI()
@@ -22,15 +23,14 @@ class LineInput(BaseModel):
 
 @app.post('/allocate', status_code=201)
 def allocate(line: LineInput):
-    session = get_session()
-    repo = SqlAlchemyBatchRepository(session)
+
+    uow = SqlAlchemyBatchUnitOfWork()
     try:
         batch_ref = services.allocate(
             orderid=line.orderid,
             sku=line.sku,
             quantity=line.quantity,
-            repo=repo,
-            session=session
+            uow=uow
         )
     except (OutOfStockException, InvalidSkuException) as e:
         return JSONResponse(
@@ -49,8 +49,8 @@ class BatchInput(BaseModel):
 
 @app.post('/add_batch', status_code=201)
 def add_batch(batch: BatchInput):
-    session = get_session()
-    repo = SqlAlchemyBatchRepository(session)
+
+    uow = SqlAlchemyBatchUnitOfWork()
 
     # eta = batch.eta
     # if eta is not None:
@@ -61,8 +61,7 @@ def add_batch(batch: BatchInput):
         sku=batch.sku,
         quantity=batch.quantity,
         eta=batch.eta,
-        repo=repo,
-        session=session
+        uow=uow
     )
 
     return 'OK'

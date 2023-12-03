@@ -8,6 +8,7 @@ from allocation import config, services
 from allocation.adapters.orm import start_mappers
 from allocation.models import OutOfStockException
 from allocation.repository import SqlAlchemyBatchRepository
+from allocation.service_layer.unit_of_work import SqlAlchemyBatchUnitOfWork
 from allocation.services import InvalidSkuException
 
 app = Flask(__name__)
@@ -28,27 +29,22 @@ get_session = sessionmaker(bind=engine)
 
 @app.route('/allocate', methods=['get', 'post'])
 def allocate():
-    session = get_session()
-    repo = SqlAlchemyBatchRepository(session)
+    uow = SqlAlchemyBatchUnitOfWork()
     try:
         batch_ref = services.allocate(
             orderid=request.json['orderid'],
             sku=request.json['sku'],
             quantity=request.json['quantity'],
-            repo=repo,
-            session=session
+            uow=uow
         )
     except (OutOfStockException, InvalidSkuException) as e:
-        print([f'{b.reference}-{b.eta}' for b in repo.list()])
         return jsonify(dict(message=str(e))), 400
     return jsonify({'batch_ref': batch_ref}), 201
 
 
 @app.route('/add_batch', methods=['post', ])
 def add_batch():
-    session = get_session()
-    repo = SqlAlchemyBatchRepository(session)
-
+    uow = SqlAlchemyBatchUnitOfWork()
     eta = request.json['eta']
     if eta is not None:
         eta = datetime.fromisoformat(eta).date()
@@ -58,8 +54,7 @@ def add_batch():
         sku=request.json['sku'],
         quantity=request.json['quantity'],
         eta=eta,
-        repo=repo,
-        session=session
+        uow=uow
     )
 
     return 'OK', 201

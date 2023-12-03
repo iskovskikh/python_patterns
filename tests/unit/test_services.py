@@ -3,6 +3,7 @@ import pytest
 from allocation import services
 from allocation.models import Batch
 from allocation.repository import AbstractBatchRepository
+from allocation.service_layer.unit_of_work import AbstractBatchUnitOfWork
 from allocation.services import InvalidSkuException
 
 
@@ -28,75 +29,82 @@ class FakeBatchRepository(AbstractBatchRepository):
         return list(self._batches)
 
 
+class FakeBatchUnitOfWork(AbstractBatchUnitOfWork):
+    def __init__(self):
+        self.batches = FakeBatchRepository([])
+        self.committed = False
+
+    def commit(self):
+        self.committed = True
+
+    def rollback(self):
+        pass
+
+
 def test_add_batch():
-    repo, session = FakeBatchRepository([]), FakeSession()
+    # repo, session = FakeBatchRepository([]), FakeSession()
+    uow = FakeBatchUnitOfWork()
     services.add_batch(
         reference='b1',
         sku='table',
         quantity=2,
         eta=None,
-        repo=repo,
-        session=session
+        uow=uow
     )
-    assert repo.get('b1') is not None
-    assert session.committed
+
+    assert uow.batches.get('b1') is not None
+    assert uow.committed
 
 
 def test_allocate_returns_allocation():
-    repo, session = FakeBatchRepository([]), FakeSession()
+    uow = FakeBatchUnitOfWork()
     services.add_batch(
         reference='b1',
         sku='Table',
         quantity=2,
         eta=None,
-        repo=repo,
-        session=session
+        uow=uow
     )
     result = services.allocate(
         orderid='o1',
         sku='Table',
         quantity=1,
-        repo=repo,
-        session=session
+        uow=uow
     )
     assert result == "b1"
 
 
-def test_error_for_invalid_sku():
-    repo, session = FakeBatchRepository([]), FakeSession()
+def test_allocate_error_for_invalid_sku():
+    uow = FakeBatchUnitOfWork()
     services.add_batch(
         reference='batch-001',
         sku='Table',
         quantity=100,
         eta=None,
-        repo=repo,
-        session=session
+        uow=uow
     )
     with pytest.raises(InvalidSkuException, match='Недопустимый артикул NotExistingTable'):
         services.allocate(
             orderid='order-001',
             sku='NotExistingTable',
             quantity=10,
-            repo=repo,
-            session=FakeSession()
+            uow=uow
         )
 
 
-def test_commits():
-    repo, session = FakeBatchRepository([]), FakeSession()
+def test_allocate_commits():
+    uow = FakeBatchUnitOfWork()
     services.add_batch(
         reference='batch-001',
         sku='Table',
         quantity=100,
         eta=None,
-        repo=repo,
-        session=session
+        uow=uow
     )
     services.allocate(
         orderid='order-001',
         sku='Table',
         quantity=10,
-        repo=repo,
-        session=FakeSession()
+        uow=uow
     )
-    assert session.committed is True
+    assert uow.committed
