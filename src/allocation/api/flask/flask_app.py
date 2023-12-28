@@ -8,7 +8,7 @@ from allocation import config, services
 from allocation.adapters.orm import start_mappers
 from allocation.models import OutOfStockException
 from allocation.repository import SqlAlchemyBatchRepository
-from allocation.service_layer.unit_of_work import SqlAlchemyBatchUnitOfWork
+from allocation.service_layer.unit_of_work import SqlAlchemyProductUnitOfWork
 from allocation.services import InvalidSkuException
 
 app = Flask(__name__)
@@ -29,7 +29,7 @@ get_session = sessionmaker(bind=engine)
 
 @app.route('/allocate', methods=['get', 'post'])
 def allocate():
-    uow = SqlAlchemyBatchUnitOfWork()
+    uow = SqlAlchemyProductUnitOfWork()
     try:
         batch_ref = services.allocate(
             orderid=request.json['orderid'],
@@ -44,7 +44,7 @@ def allocate():
 
 @app.route('/add_batch', methods=['post', ])
 def add_batch():
-    uow = SqlAlchemyBatchUnitOfWork()
+    uow = SqlAlchemyProductUnitOfWork()
     eta = request.json['eta']
     if eta is not None:
         eta = datetime.fromisoformat(eta).date()

@@ -1,10 +1,8 @@
 from datetime import date
 from typing import Optional
 
-from allocation import models
-from allocation.models import Batch, OrderLine
-from allocation.repository import AbstractBatchRepository
-from allocation.service_layer.unit_of_work import AbstractBatchUnitOfWork
+from allocation.models import Batch, OrderLine, Product
+from allocation.service_layer.unit_of_work import AbstractProductUnitOfWork
 
 
 class InvalidSkuException(Exception):
@@ -19,7 +17,7 @@ def allocate(
         orderid: str,
         sku: str,
         quantity: int,
-        uow:AbstractBatchUnitOfWork
+        uow: AbstractProductUnitOfWork
 ) -> str:
     line = OrderLine(
         orderid=orderid,
@@ -27,10 +25,10 @@ def allocate(
         quantity=quantity
     )
     with uow:
-        batches = uow.batches.list()
-        if not is_valid_sku(line.sku, batches):
+        product = uow.products.get(line.sku)
+        if product is None:
             raise InvalidSkuException(f'Недопустимый артикул {sku}')
-        batch_ref = models.allocate(line, batches)
+        batch_ref = product.allocate(line)
         uow.commit()
     return batch_ref
 
@@ -40,8 +38,12 @@ def add_batch(
         sku: str,
         quantity: int,
         eta: Optional[date],
-        uow: AbstractBatchUnitOfWork
+        uow: AbstractProductUnitOfWork
 ):
     with uow:
-        uow.batches.add(Batch(reference=reference, sku=sku, quantity=quantity, eta=eta))
+        product = uow.products.get(sku=sku)
+        if product is None:
+            product = Product(sku=sku, batches=[])
+            uow.products.add(product)
+        product.batches.append(Batch(reference=reference, sku=sku, quantity=quantity, eta=eta))
         uow.commit()

@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from allocation.models import Batch
+from allocation.models import Batch, Product
 
 
 class AbstractBatchRepository(ABC):
@@ -18,7 +18,17 @@ class AbstractBatchRepository(ABC):
         raise NotImplementedError
 
 
-class SqlAlchemyBatchRepository(AbstractBatchRepository):
+class AbstractProductRepository(ABC):
+    @abstractmethod
+    def add(self, product: Product) -> None:
+        raise NotImplementedError
+
+    @abstractmethod
+    def get(self, sku) -> Product:
+        raise NotImplementedError
+
+
+class SqlAlchemyProductRepository(AbstractBatchRepository):
 
     def __init__(self, session):
         self.session = session

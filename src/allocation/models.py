@@ -7,12 +7,6 @@ class OutOfStockException(Exception):
     pass
 
 
-class Product:
-    sku: str
-    version_number: int
-
-
-# @dataclass(frozen=True)
 @dataclass(unsafe_hash=True)
 class OrderLine:
     orderid: str
@@ -72,10 +66,18 @@ class Batch:
         return self.sku == line.sku and self.available_quantity >= line.quantity
 
 
-def allocate(line: OrderLine, batches: List[Batch]) -> str:
-    try:
-        batch = next(b for b in sorted(batches) if b.can_allocate(line))
-        batch.allocate(line)
-        return batch.reference
-    except StopIteration:
-        raise OutOfStockException(f'Артикула {line.sku} нет в наличии')
+class Product:
+
+    def __init__(self, sku: str, batches: list[Batch], version_number: int = 0):
+        self.sku = sku
+        self.batches = batches
+        self.version_number = version_number
+
+    def allocate(self, line: OrderLine) -> str:
+        try:
+            batch = next(b for b in sorted(self.batches) if b.can_allocate(line))
+            batch.allocate(line)
+            self.version_number += 1
+            return batch.reference
+        except StopIteration:
+            raise OutOfStockException(f'Артикула {line.sku} нет в наличии')

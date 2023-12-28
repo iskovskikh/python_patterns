@@ -3,7 +3,7 @@ import pytest
 from allocation import services
 from allocation.models import Batch
 from allocation.repository import AbstractBatchRepository
-from allocation.service_layer.unit_of_work import AbstractBatchUnitOfWork
+from allocation.service_layer.unit_of_work import AbstractProductUnitOfWork
 from allocation.services import InvalidSkuException
 
 
@@ -29,7 +29,7 @@ class FakeBatchRepository(AbstractBatchRepository):
         return list(self._batches)
 
 
-class FakeBatchUnitOfWork(AbstractBatchUnitOfWork):
+class FakeProductUnitOfWork(AbstractProductUnitOfWork):
     def __init__(self):
         self.batches = FakeBatchRepository([])
         self.committed = False
@@ -43,7 +43,7 @@ class FakeBatchUnitOfWork(AbstractBatchUnitOfWork):
 
 def test_add_batch():
     # repo, session = FakeBatchRepository([]), FakeSession()
-    uow = FakeBatchUnitOfWork()
+    uow = FakeProductUnitOfWork()
     services.add_batch(
         reference='b1',
         sku='table',
@@ -57,7 +57,7 @@ def test_add_batch():
 
 
 def test_allocate_returns_allocation():
-    uow = FakeBatchUnitOfWork()
+    uow = FakeProductUnitOfWork()
     services.add_batch(
         reference='b1',
         sku='Table',
@@ -75,7 +75,7 @@ def test_allocate_returns_allocation():
 
 
 def test_allocate_error_for_invalid_sku():
-    uow = FakeBatchUnitOfWork()
+    uow = FakeProductUnitOfWork()
     services.add_batch(
         reference='batch-001',
         sku='Table',
@@ -93,7 +93,7 @@ def test_allocate_error_for_invalid_sku():
 
 
 def test_allocate_commits():
-    uow = FakeBatchUnitOfWork()
+    uow = FakeProductUnitOfWork()
     services.add_batch(
         reference='batch-001',
         sku='Table',

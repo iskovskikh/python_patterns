@@ -1,7 +1,7 @@
 from sqlalchemy import text
 
 from allocation.models import Batch, OrderLine
-from allocation.repository import SqlAlchemyBatchRepository
+from allocation.service_layer.repository import SqlAlchemyBatchRepository
 
 
 def test_repository_can_save_batch(session):
