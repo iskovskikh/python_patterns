@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "python-patterns"
+version = "0.1.0"
+description = ""
+authors = ["Alexey Iskovskikh <iskovskikh@gmail.com>"]
+readme = "README.md"
+
+
+[tool.poetry.dependencies]
+allocation = {path = "./src", develop = true}
+python = "^3.11"
+sqlalchemy = "^2.0.25"
+
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0.0"
+requests = "^2.31.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
